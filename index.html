@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Task Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+    <h1>Student Task Manager</h1>
+    
+    <form id="taskForm">
+        <label for="courseId">Course ID:</label>
+        <input type="text" id="courseId" name="courseId" required><br><br>
+        
+        <label for="taskName">Task Name:</label>
+        <input type="text" id="taskName" name="taskName" required><br><br>
+        
+        <label for="dueDate">Due Date:</label>
+        <input type="date" id="dueDate" name="dueDate" required><br><br>
+        
+        <label for="additionalDetails">Additional Details:</label><br>
+        <textarea id="additionalDetails" name="additionalDetails" rows="4" cols="50"></textarea><br><br>
+        
+        <center><button type="submit">Add Task</button></center>
+    </form>
+    </div>
+
+    <div id="taskList"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const taskForm = document.getElementById('taskForm');
+            const taskList = document.getElementById('taskList');
+        
+            taskForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+        
+                const formData = new FormData(taskForm);
+                const taskData = {
+                    courseId: formData.get('courseId'),
+                    taskName: formData.get('taskName'),
+                    dueDate: formData.get('dueDate'),
+                    additionalDetails: formData.get('additionalDetails')
+                };
+
+                console.log('Task Data:', taskData);
+        
+                // Send task data to the backend
+                fetch('http://localhost:3200/addTask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(taskData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to add task');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Clear form fields after successful submission
+                    taskForm.reset();
+                    // Append newly added task to the task list
+                    const taskItem = document.createElement('div');
+                    taskItem.innerHTML = `
+                        <p><strong>Task Name:</strong> ${data.taskName}</p>
+                        <p><strong>Due Date:</strong> ${data.dueDate}</p>
+                        <p><strong>Additional Details:</strong> ${data.additionalDetails}</p>
+                        <hr>
+                    `;
+                    taskList.appendChild(taskItem);
+                })
+                .catch(error => {
+                    console.error('Error adding task:', error);
+                    alert('Failed to add task');
+                });
+            });
+        });
+        
+    </script>
+     <div class="footer"><a href="#" id="myGithubLink"> By Shasidhar</a></div>
+</body>
+</html>
